@@ -108,9 +108,11 @@ const AnimatedTabBar = ({
       </AnimatedSvg>
       <View style={styles.tabBarContainer}>
         {routes.map((route, index) => {
+          const active = index === activeIndex;
           return (
             <TabBarComponent
               key={route.key}
+              active={active}
               onLayout={e => handleLayout(e, index)}
               onPress={() => navigation.navigate(route.name)}
             />
@@ -124,18 +126,37 @@ const AnimatedTabBar = ({
 // ---------------------------------------------------------------------------------
 
 type TabBarComponentProps = {
+  active?: boolean;
   onLayout: (e: LayoutChangeEvent) => void;
   onPress: () => void;
 };
 
-const TabBarComponent = ({onLayout, onPress}: TabBarComponentProps) => {
+const TabBarComponent = ({active, onLayout, onPress}: TabBarComponentProps) => {
+  // animations ------------------------------------------------------
+  const animatedComponentCircleStyles = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: withTiming(active ? 1 : 0, {duration: 250}),
+        },
+      ],
+    };
+  });
+  const animatedIconContainerStyles = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(active ? 1 : 0.5, {duration: 250}),
+    };
+  });
   return (
     <Pressable onPress={onPress} onLayout={onLayout} style={styles.component}>
-      <View style={[styles.componentCircle]} />
-      <View style={[styles.iconContainer]}>
+      <Animated.View
+        style={[styles.componentCircle, animatedComponentCircleStyles]}
+      />
+      <Animated.View
+        style={[styles.iconContainer, animatedIconContainerStyles]}>
         {/* @ts-ignore */}
         <Text>?</Text>
-      </View>
+      </Animated.View>
     </Pressable>
   );
 };
