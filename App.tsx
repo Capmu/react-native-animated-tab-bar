@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useEffect, useReducer, useRef} from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -23,6 +23,8 @@ import Animated, {
   withTiming,
   useDerivedValue,
 } from 'react-native-reanimated';
+// lottie
+import Lottie from 'lottie-react-native';
 
 // ---------------------------------------------------------------------------------
 
@@ -37,10 +39,66 @@ const App = () => {
       <StatusBar barStyle="light-content" />
       <NavigationContainer>
         <Tab.Navigator tabBar={props => <AnimatedTabBar {...props} />}>
-          <Tab.Screen name="Home" component={PlaceholderScreen} />
-          <Tab.Screen name="Upload" component={PlaceholderScreen} />
-          <Tab.Screen name="Chat" component={PlaceholderScreen} />
-          <Tab.Screen name="Settings" component={PlaceholderScreen} />
+          <Tab.Screen
+            name="Home"
+            component={PlaceholderScreen}
+            options={{
+              // eslint-disable-next-line react/no-unstable-nested-components
+              tabBarIcon: ({ref}) => (
+                <Lottie
+                  ref={ref}
+                  loop={false}
+                  source={require('./src/assets/lottie/home.icon.json')}
+                  style={styles.icon}
+                />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Upload"
+            component={PlaceholderScreen}
+            options={{
+              // eslint-disable-next-line react/no-unstable-nested-components
+              tabBarIcon: ({ref}) => (
+                <Lottie
+                  ref={ref}
+                  loop={false}
+                  source={require('./src/assets/lottie/upload.icon.json')}
+                  style={styles.icon}
+                />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Chat"
+            component={PlaceholderScreen}
+            options={{
+              // eslint-disable-next-line react/no-unstable-nested-components
+              tabBarIcon: ({ref}) => (
+                <Lottie
+                  ref={ref}
+                  loop={false}
+                  source={require('./src/assets/lottie/chat.icon.json')}
+                  style={styles.icon}
+                />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={PlaceholderScreen}
+            options={{
+              // eslint-disable-next-line react/no-unstable-nested-components
+              tabBarIcon: ({ref}) => (
+                <Lottie
+                  ref={ref}
+                  loop={false}
+                  source={require('./src/assets/lottie/settings.icon.json')}
+                  style={styles.icon}
+                />
+              ),
+            }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </>
@@ -109,10 +167,12 @@ const AnimatedTabBar = ({
       <View style={styles.tabBarContainer}>
         {routes.map((route, index) => {
           const active = index === activeIndex;
+          const {options} = descriptors[route.key];
           return (
             <TabBarComponent
               key={route.key}
               active={active}
+              options={options}
               onLayout={e => handleLayout(e, index)}
               onPress={() => navigation.navigate(route.name)}
             />
@@ -127,11 +187,27 @@ const AnimatedTabBar = ({
 
 type TabBarComponentProps = {
   active?: boolean;
+  options: BottomTabNavigationOptions;
   onLayout: (e: LayoutChangeEvent) => void;
   onPress: () => void;
 };
 
-const TabBarComponent = ({active, onLayout, onPress}: TabBarComponentProps) => {
+const TabBarComponent = ({
+  active,
+  options,
+  onLayout,
+  onPress,
+}: TabBarComponentProps) => {
+  // handle lottie animation -----------------------------------------
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (active && ref?.current) {
+      // @ts-ignore
+      ref.current.play();
+    }
+  }, [active]);
+
   // animations ------------------------------------------------------
   const animatedComponentCircleStyles = useAnimatedStyle(() => {
     return {
@@ -155,7 +231,7 @@ const TabBarComponent = ({active, onLayout, onPress}: TabBarComponentProps) => {
       <Animated.View
         style={[styles.iconContainer, animatedIconContainerStyles]}>
         {/* @ts-ignore */}
-        <Text>?</Text>
+        {options.tabBarIcon ? options.tabBarIcon({ref}) : <Text>?</Text>}
       </Animated.View>
     </Pressable>
   );
